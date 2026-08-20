@@ -6,6 +6,58 @@
 
 /* -------- Breakpoint 1: Tablet (bis 968px) ---------- */
 @media (max-width: 968px) {
+  /* ---- Horizontaler Overflow-Schutz (Bugfix 06/26): kein Seitwärts-Wippen.
+     1fr-Grid-Spalten haben implizit min-width:auto – breite Kind-Inhalte
+     (Mono-Zahlen, nowrap-Texte) drückten Sidebar/Panels auf >100vw, iOS
+     erlaubte dann horizontales Rubber-Banding trotz overflow-x:hidden. ---- */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  body {
+    /* Vertikal scrollen + Pinch-Zoom bleiben erlaubt, horizontales Pannen
+       aus – behebt auch das "hängt beim Hochscrollen bis Rauszoomen". */
+    touch-action: pan-y pinch-zoom;
+  }
+  .app-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .app-layout > *,
+  .main-content,
+  .coin-sidebar,
+  .performance-analytics,
+  .signal-panel,
+  .signal-panel-container,
+  .chart-wrap {
+    min-width: 0;
+    max-width: 100vw;
+  }
+  /* Grid-/Flex-Kinder in den drei Hauptspalten dürfen schrumpfen */
+  .coin-sidebar *,
+  .signal-panel *,
+  .signal-panel-container *,
+  .performance-analytics * {
+    min-width: 0;
+  }
+  .coin-stat {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  /* Chart & Tab-Leiste: dürfen nie breiter als der Viewport werden – die
+     Chart-Canvas bekommt vom Chart-Lib eine Inline-Pixelbreite und drückte
+     sonst die ganze Mittelspalte auf >100vw. */
+  .strategy-tabs-bar,
+  .main-chart,
+  .chart-header {
+    min-width: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .main-chart .chart-container,
+  .main-chart canvas {
+    max-width: 100%;
+  }
+
   /* Layout kommt bereits in App.css auf 1 Spalte — hier fine-tuning */
   .app-layout {
     grid-template-rows: auto auto auto;

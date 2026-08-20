@@ -116,6 +116,13 @@ rückwärtskompatibel und mit Regressionstests erfolgen. Original-Ordnerstruktur
    liefert None für gesperrte Keys → Lernlauf skippt 'Vom Trader endgültig verworfen');
    Papierkorb-Button neben Bestätigen im Lern-Panel. Testing-Agent: 4/4 Backend + UI grün
    (/app/tests/test_iter4_lesson_reject.py, seedet+cleant eigenen synthetischen Key)
+8. MOBILE-BUGFIX (20.06.): horizontales 'Seitwärts-Wippen' + 'kann nicht mehr hochscrollen bis
+   Rauszoomen' behoben. RCA: .app-layout nutzte 1fr (= minmax(auto,1fr)) – breite Mono-Zahlen
+   drückten die Spuren auf ~448px bei 390px Viewport → iOS-Rubber-Banding. Fix nur in
+   components/mobile.css (@media <=968px): html/body overflow-x:hidden, body touch-action
+   pan-y pinch-zoom, grid minmax(0,1fr), min-width:0 auf Hauptspalten+Kindern, Chart/Tabs
+   max-width:100vw. Testing-Agent: 0 Overflow-Elemente auf 360/390/768px, Desktop (1920)
+   unverändert 3-spaltig, Scroll-Roundtrip ok
 
 ## Backlog / Nächste Aufgaben
 - P1: Dynamischer Gebühren-Filter (Punkt 2 aus KI-Selbstanalyse) weiter verfeinern
