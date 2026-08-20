@@ -236,16 +236,21 @@ def rules_text(rules: Dict) -> str:
         f"Max. Hebel: {r['max_leverage']}x" if r["max_leverage"] else "Max. Hebel: keine Vorgabe",
         f"Erlaubte Richtungen: {', '.join(r['allowed_sides'])}",
     ]
-    if r["min_confidence"]:
-        parts.append(f"Mindest-Konfidenz: {r['min_confidence']}%")
+    # Limits IMMER explizit ausgeben: der Wert 0 heißt "kein Limit". Ohne diese
+    # Klarstellung interpretierte die KI '0' als 'deaktiviert' und stellte
+    # fälschlich das Traden ein (Bugfix 06/26).
+    parts.append(f"Mindest-Konfidenz: {r['min_confidence']}%" if r["min_confidence"]
+                 else "Mindest-Konfidenz: keine Vorgabe")
     if r["blocked_symbols"]:
         parts.append("Gesperrte Coins: " + ", ".join(r["blocked_symbols"]))
-    if r["max_open_trades"]:
-        parts.append(f"Max. offene KI-Trades: {r['max_open_trades']}")
-    if r.get("max_daily_loss_usdt"):
-        parts.append(f"Tages-Verlustlimit: {r['max_daily_loss_usdt']} USDT")
-    if r.get("max_trades_per_day"):
-        parts.append(f"Max. Trades pro Tag: {r['max_trades_per_day']}")
+    parts.append(f"Max. offene KI-Trades: {r['max_open_trades']}" if r["max_open_trades"]
+                 else "Max. offene KI-Trades: UNBEGRENZT (0 = kein Limit)")
+    parts.append(f"Tages-Verlustlimit: {r['max_daily_loss_usdt']} USDT"
+                 if r.get("max_daily_loss_usdt")
+                 else "Tages-Verlustlimit: KEINES (0 = kein Limit)")
+    parts.append(f"Max. Trades pro Tag: {r['max_trades_per_day']}"
+                 if r.get("max_trades_per_day")
+                 else "Max. Trades pro Tag: UNBEGRENZT (0 = kein Limit, KEINE Deaktivierung)")
     if r.get("forbidden_terms"):
         parts.append("Verbotene Begriffe in Lektionen: " + ", ".join(r["forbidden_terms"]))
     parts.append("Neue KI-Strategien live: "

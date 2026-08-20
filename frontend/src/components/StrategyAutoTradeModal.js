@@ -5,6 +5,7 @@ import SafeOverlay from './SafeOverlay';
 import './AutoTradeModal.css';
 import './StrategyAutoTradeModal.css';
 import { assetLabel } from '../hooks/useInstruments';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL || '';
 
@@ -32,6 +33,7 @@ const DEFAULT_CFG = {
   be_trigger_profit_pct: 30,
   require_all_rules: false,
   fee_percent: 0.06,
+  ai_manage: false,
   trade_pre_signals: false,
   profit_secure_enabled: false,
   profit_secure_trigger_pct: 30,
@@ -224,12 +226,11 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
             <div className="at-section">
               <div className="at-field">
                 <label>Max. Kapital (USDT Margin)</label>
-                <input
-                  type="number"
+                <NumInput
                   value={cfg.max_capital}
                   min={1}
                   step={1}
-                  onChange={e => update('max_capital', parseFloat(e.target.value) || 0)}
+                  onCommit={(v) => update('max_capital', v || 0)}
                   data-testid="sat-max-capital"
                 />
               </div>
@@ -274,23 +275,21 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
                   <div className="at-section" style={{ marginTop: 10 }}>
                     <div className="at-field">
                       <label>{cfg.auto_lev_mode === 'liq_ticks' ? 'Abstand (Ticks, 1 Tick = 0.01%)' : 'Abstand (% vom Preis)'}</label>
-                      <input
-                        type="number"
+                      <NumInput
                         step={cfg.auto_lev_mode === 'liq_ticks' ? 1 : 0.05}
                         min={0}
                         value={cfg.auto_lev_value ?? 0.5}
-                        onChange={e => update('auto_lev_value', parseFloat(e.target.value) || 0)}
+                        onCommit={(v) => update('auto_lev_value', v || 0)}
                         data-testid="sat-auto-lev-value"
                       />
                     </div>
                     <div className="at-field">
                       <label>Max. Hebel</label>
-                      <input
-                        type="number"
+                      <NumInput int
                         min={1}
                         max={200}
                         value={cfg.auto_lev_max ?? 50}
-                        onChange={e => update('auto_lev_max', parseInt(e.target.value) || 50)}
+                        onCommit={(v) => update('auto_lev_max', v || 50)}
                         data-testid="sat-auto-lev-max"
                       />
                     </div>
@@ -330,19 +329,17 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
                 <div className="at-section">
                   <div className="at-field">
                     <label>Ticks unter/über Tief/Hoch</label>
-                    <input
-                      type="number"
+                    <NumInput int
                       value={cfg.sl_ticks}
-                      onChange={e => update('sl_ticks', parseInt(e.target.value) || 0)}
+                      onCommit={(v) => update('sl_ticks', v || 0)}
                       data-testid="sat-sl-ticks"
                     />
                   </div>
                   <div className="at-field">
                     <label>Lookback (Kerzen)</label>
-                    <input
-                      type="number"
+                    <NumInput int
                       value={cfg.sl_lookback}
-                      onChange={e => update('sl_lookback', parseInt(e.target.value) || 0)}
+                      onCommit={(v) => update('sl_lookback', v || 0)}
                       data-testid="sat-sl-lookback"
                     />
                   </div>
@@ -351,11 +348,10 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               {cfg.sl_mode === 'atr' && (
                 <div className="at-field">
                   <label>ATR-Multiplikator (SL-Abstand = ATR × Wert)</label>
-                  <input
-                    type="number"
+                  <NumInput
                     step={0.1}
                     value={cfg.atr_sl_multiplier ?? 1.2}
-                    onChange={e => update('atr_sl_multiplier', parseFloat(e.target.value) || 0)}
+                    onCommit={(v) => update('atr_sl_multiplier', v || 0)}
                     data-testid="sat-sl-atr-mult"
                   />
                 </div>
@@ -363,11 +359,10 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               {cfg.sl_mode === 'fixed' && (
                 <div className="at-field">
                   <label>SL Abstand %</label>
-                  <input
-                    type="number"
+                  <NumInput
                     step={0.1}
                     value={cfg.sl_fixed_percent}
-                    onChange={e => update('sl_fixed_percent', parseFloat(e.target.value) || 0)}
+                    onCommit={(v) => update('sl_fixed_percent', v || 0)}
                     data-testid="sat-sl-percent"
                   />
                 </div>
@@ -397,19 +392,17 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
                 <div className="at-section">
                   <div className="at-field">
                     <label>TP1 Abstand % vom Entry</label>
-                    <input
-                      type="number" step={0.1}
+                    <NumInput step={0.1}
                       value={cfg.tp1_percent ?? 0.5}
-                      onChange={e => update('tp1_percent', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('tp1_percent', v || 0)}
                       data-testid="sat-tp1-percent"
                     />
                   </div>
                   <div className="at-field">
                     <label>TP Full Abstand % vom Entry</label>
-                    <input
-                      type="number" step={0.1}
+                    <NumInput step={0.1}
                       value={cfg.tp_full_percent ?? 1.0}
-                      onChange={e => update('tp_full_percent', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('tp_full_percent', v || 0)}
                       data-testid="sat-tpfull-percent"
                     />
                   </div>
@@ -425,21 +418,19 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
                 <div className="at-section">
                   <div className="at-field">
                     <label>TP1 bei CRV</label>
-                    <input
-                      type="number"
+                    <NumInput
                       step={0.1}
                       value={cfg.tp1_crv}
-                      onChange={e => update('tp1_crv', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('tp1_crv', v || 0)}
                       data-testid="sat-tp1-crv"
                     />
                   </div>
                   <div className="at-field">
                     <label>TP Full bei CRV</label>
-                    <input
-                      type="number"
+                    <NumInput
                       step={0.1}
                       value={cfg.tp_full_crv}
-                      onChange={e => update('tp_full_crv', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('tp_full_crv', v || 0)}
                       data-testid="sat-tpfull-crv"
                     />
                   </div>
@@ -447,12 +438,11 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               )}
               <div className="at-field">
                 <label>TP1 schließt % der Position</label>
-                <input
-                  type="number"
+                <NumInput int
                   min={1}
                   max={99}
                   value={cfg.tp1_close_percent}
-                  onChange={e => update('tp1_close_percent', parseInt(e.target.value) || 0)}
+                  onCommit={(v) => update('tp1_close_percent', v || 0)}
                   data-testid="sat-tp1-close"
                 />
               </div>
@@ -476,10 +466,9 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               {cfg.be_mode === 'crv' && (
                 <div className="at-field small">
                   <label>Break-Even ab CRV (R)</label>
-                  <input
-                    type="number" step={0.1} min={0.1}
+                  <NumInput step={0.1} min={0.1}
                     value={cfg.be_trigger_crv}
-                    onChange={e => update('be_trigger_crv', parseFloat(e.target.value) || 1)}
+                    onCommit={(v) => update('be_trigger_crv', v || 1)}
                     data-testid="sat-be-crv"
                   />
                 </div>
@@ -487,21 +476,19 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               {cfg.be_mode === 'profit_pct' && (
                 <div className="at-field small">
                   <label>Break-Even ab Gewinn % auf Marge</label>
-                  <input
-                    type="number" step={5} min={1}
+                  <NumInput step={5} min={1}
                     value={cfg.be_trigger_profit_pct}
-                    onChange={e => update('be_trigger_profit_pct', parseFloat(e.target.value) || 30)}
+                    onCommit={(v) => update('be_trigger_profit_pct', v || 30)}
                     data-testid="sat-be-pct"
                   />
                 </div>
               )}
               <div className="at-field small">
                 <label>Gebühren % (pro Fill, wird bei Paper & Live berechnet)</label>
-                <input
-                  type="number"
+                <NumInput
                   step={0.01}
                   value={cfg.fee_percent}
-                  onChange={e => update('fee_percent', parseFloat(e.target.value) || 0)}
+                  onCommit={(v) => update('fee_percent', v || 0)}
                   data-testid="sat-fee"
                 />
               </div>
@@ -525,6 +512,22 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
               </label>
             </div>
 
+            {/* KI-Trader-Zugriff auf Trades dieser Strategie */}
+            <div className="at-block">
+              <div className="at-block-title">KI-TRADER</div>
+              <label className="at-check" style={{ marginTop: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={!!cfg.ai_manage}
+                  onChange={e => update('ai_manage', e.target.checked)}
+                  data-testid="sat-ai-manage"
+                />
+                <span>KI-Trader darf offene Trades dieser Strategie anpassen
+                  (SL/TP, Teilschließen, Margin/Hebel). Standard: aus – die KI
+                  managt nur ihre eigenen Trades.</span>
+              </label>
+            </div>
+
             {/* Gewinnsicherung */}
             <div className="at-block">
               <div className="at-block-title">GEWINNSICHERUNG</div>
@@ -541,24 +544,22 @@ export default function StrategyAutoTradeModal({ strategyId, strategyName, symbo
                 <div className="at-section" style={{ marginTop: 10 }}>
                   <div className="at-field">
                     <label>Auslöser: Gewinn % auf Marge</label>
-                    <input
-                      type="number"
+                    <NumInput
                       step={5}
                       min={1}
                       value={cfg.profit_secure_trigger_pct}
-                      onChange={e => update('profit_secure_trigger_pct', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('profit_secure_trigger_pct', v || 0)}
                       data-testid="sat-ps-trigger"
                     />
                   </div>
                   <div className="at-field">
                     <label>Gesicherter Gewinn-Anteil %</label>
-                    <input
-                      type="number"
+                    <NumInput
                       step={5}
                       min={1}
                       max={95}
                       value={cfg.profit_lock_pct}
-                      onChange={e => update('profit_lock_pct', parseFloat(e.target.value) || 0)}
+                      onCommit={(v) => update('profit_lock_pct', v || 0)}
                       data-testid="sat-ps-lock"
                     />
                   </div>

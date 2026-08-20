@@ -278,10 +278,10 @@ async def lifespan(app: FastAPI):
     _of_syms = list(TOP_10_COINS) + [
         i.bitunix for i in _instr.INSTRUMENTS
         if i.bitunix and i.group in (_instr.GROUP_RESOURCES, _instr.GROUP_INDICES)]
-    asyncio.create_task(orderflow.run_loop(_of_syms))
+    app.state.orderflow_task = asyncio.create_task(orderflow.run_loop(_of_syms))
     # Forex/Metalle: Orderflow-Näherung aus ECHTEM CME-Futures-Volumen (Yahoo)
     from services.fx_orderflow import fx_orderflow
-    asyncio.create_task(fx_orderflow.run_loop())
+    app.state.fx_orderflow_task = asyncio.create_task(fx_orderflow.run_loop())
     # News-Wächter (KI-Team-Rolle) – überwacht News + Wirtschaftskalender 24/7
     from services.ai_news_watcher import news_watcher
     news_watcher.setup(ai_engine)
@@ -373,6 +373,19 @@ async def lifespan(app: FastAPI):
     yield
     logger.info("Shutting down...")
     state.scanner_running.clear()
+    # Orderflow-Loops sauber beenden – sonst reconnectet der WS-Loop endlos
+    # weiter und der alte Prozess hängt beim Reload/Deploy (Fix 06/26).
+    try:
+        from services.orderflow import orderflow as _of
+        from services.fx_orderflow import fx_orderflow as _fxof
+        await _of.stop()
+        await _fxof.stop()
+        for tname in ("orderflow_task", "fx_orderflow_task"):
+            t = getattr(app.state, tname, None)
+            if t and not t.done():
+                t.cancel()
+    except Exception as e:
+        logger.warning(f"Orderflow-Shutdown: {e}")
     await feed.close()
     app.mongodb_client.close()
 

@@ -4,6 +4,7 @@ import { toast } from '../lib/toast';
 import { authHeaders, isAdmin } from '../auth';
 import SafeOverlay from './SafeOverlay';
 import './AutoTradeModal.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -115,8 +116,8 @@ const AutoTradeModal = ({ symbol, onClose }) => {
         <div className="at-section">
           <div className="at-field">
             <label>Max. Kapital (USDT Margin)</label>
-            <input type="number" value={cfg.max_capital} min={1} step={1}
-              onChange={e => update('max_capital', parseFloat(e.target.value))} data-testid="at-max-capital" />
+            <NumInput value={cfg.max_capital} min={1} step={1}
+              onCommit={(v) => update('max_capital', v)} data-testid="at-max-capital" />
           </div>
           <div className="at-field">
             <label>Hebel: <b>{cfg.leverage}x</b></label>
@@ -136,13 +137,13 @@ const AutoTradeModal = ({ symbol, onClose }) => {
           {cfg.sl_mode === 'structure' ? (
             <div className="at-section">
               <div className="at-field"><label>Ticks unter/über Tief/Hoch</label>
-                <input type="number" value={cfg.sl_ticks} onChange={e => update('sl_ticks', parseInt(e.target.value))} data-testid="at-sl-ticks" /></div>
+                <NumInput int value={cfg.sl_ticks} onCommit={(v) => update('sl_ticks', v)} data-testid="at-sl-ticks" /></div>
               <div className="at-field"><label>Lookback (Kerzen)</label>
-                <input type="number" value={cfg.sl_lookback} onChange={e => update('sl_lookback', parseInt(e.target.value))} data-testid="at-sl-lookback" /></div>
+                <NumInput int value={cfg.sl_lookback} onCommit={(v) => update('sl_lookback', v)} data-testid="at-sl-lookback" /></div>
             </div>
           ) : (
             <div className="at-field"><label>SL Abstand %</label>
-              <input type="number" step={0.1} value={cfg.sl_fixed_percent} onChange={e => update('sl_fixed_percent', parseFloat(e.target.value))} data-testid="at-sl-percent" /></div>
+              <NumInput step={0.1} value={cfg.sl_fixed_percent} onCommit={(v) => update('sl_fixed_percent', v)} data-testid="at-sl-percent" /></div>
           )}
         </div>
 
@@ -151,19 +152,19 @@ const AutoTradeModal = ({ symbol, onClose }) => {
           <div className="at-block-title">TAKE PROFIT (dynamisch)</div>
           <div className="at-section">
             <div className="at-field"><label>TP1 bei CRV</label>
-              <input type="number" step={0.1} value={cfg.tp1_crv} onChange={e => update('tp1_crv', parseFloat(e.target.value))} data-testid="at-tp1-crv" /></div>
+              <NumInput step={0.1} value={cfg.tp1_crv} onCommit={(v) => update('tp1_crv', v)} data-testid="at-tp1-crv" /></div>
             <div className="at-field"><label>TP1 schließt % der Position</label>
-              <input type="number" min={1} max={99} value={cfg.tp1_close_percent} onChange={e => update('tp1_close_percent', parseInt(e.target.value))} data-testid="at-tp1-close" /></div>
+              <NumInput int min={1} max={99} value={cfg.tp1_close_percent} onCommit={(v) => update('tp1_close_percent', v)} data-testid="at-tp1-close" /></div>
           </div>
           <div className="at-field"><label>TP Full bei CRV</label>
-            <input type="number" step={0.1} value={cfg.tp_full_crv} onChange={e => update('tp_full_crv', parseFloat(e.target.value))} data-testid="at-tpfull-crv" /></div>
+            <NumInput step={0.1} value={cfg.tp_full_crv} onCommit={(v) => update('tp_full_crv', v)} data-testid="at-tpfull-crv" /></div>
           <label className="at-check">
             <input type="checkbox" checked={!!cfg.breakeven_enabled} onChange={e => update('breakeven_enabled', e.target.checked)} data-testid="at-breakeven" />
             <span>Bei CRV 1 → Stop Loss auf Break-Even + Gebühren</span>
           </label>
           {cfg.breakeven_enabled && (
             <div className="at-field small"><label>Gebühren % (Round-Trip Offset)</label>
-              <input type="number" step={0.01} value={cfg.fee_percent} onChange={e => update('fee_percent', parseFloat(e.target.value))} data-testid="at-fee" /></div>
+              <NumInput step={0.01} value={cfg.fee_percent} onCommit={(v) => update('fee_percent', v)} data-testid="at-fee" /></div>
           )}
           <label className="at-check">
             <input type="checkbox" checked={!!cfg.trade_pre_signals} onChange={e => update('trade_pre_signals', e.target.checked)} data-testid="at-pre-signals" />
@@ -181,9 +182,9 @@ const AutoTradeModal = ({ symbol, onClose }) => {
           {cfg.profit_secure_enabled && (
             <div className="at-section" style={{ marginTop: 10 }}>
               <div className="at-field"><label>Auslöser: Gewinn % auf Marge</label>
-                <input type="number" step={5} min={1} value={cfg.profit_secure_trigger_pct ?? 30} onChange={e => update('profit_secure_trigger_pct', parseFloat(e.target.value) || 0)} data-testid="at-ps-trigger" /></div>
+                <NumInput step={5} min={1} value={cfg.profit_secure_trigger_pct ?? 30} onCommit={(v) => update('profit_secure_trigger_pct', v || 0)} data-testid="at-ps-trigger" /></div>
               <div className="at-field"><label>Gesicherter Gewinn-Anteil %</label>
-                <input type="number" step={5} min={1} max={95} value={cfg.profit_lock_pct ?? 50} onChange={e => update('profit_lock_pct', parseFloat(e.target.value) || 0)} data-testid="at-ps-lock" /></div>
+                <NumInput step={5} min={1} max={95} value={cfg.profit_lock_pct ?? 50} onCommit={(v) => update('profit_lock_pct', v || 0)} data-testid="at-ps-lock" /></div>
             </div>
           )}
         </div>

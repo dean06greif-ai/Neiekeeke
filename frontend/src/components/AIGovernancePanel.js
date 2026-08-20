@@ -3,6 +3,7 @@ import { Crown, FloppyDisk, ArrowCounterClockwise, ShieldCheck, Drop } from '@ph
 import { toast } from '../lib/toast';
 import { authHeaders } from '../auth';
 import './AIGovernance.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -145,32 +146,32 @@ export const AIGovernancePanel = () => {
       <div className="gov-rules">
         <label>
           <span>Max. Hebel (0 = frei)</span>
-          <input type="number" min="0" max="200" value={rules.max_leverage}
-            onChange={e => setRules({ ...rules, max_leverage: Number(e.target.value) })}
+          <NumInput min="0" max="200" value={rules.max_leverage}
+            onCommit={(v) => setRules({ ...rules, max_leverage: v })}
             data-testid="master-rule-max-leverage" />
         </label>
         <label>
           <span>Mindest-Konfidenz %</span>
-          <input type="number" min="0" max="100" value={rules.min_confidence}
-            onChange={e => setRules({ ...rules, min_confidence: Number(e.target.value) })}
+          <NumInput min="0" max="100" value={rules.min_confidence}
+            onCommit={(v) => setRules({ ...rules, min_confidence: v })}
             data-testid="master-rule-min-confidence" />
         </label>
         <label>
           <span>Tages-Verlustlimit USDT (0 = aus)</span>
-          <input type="number" min="0" max="100000" value={rules.max_daily_loss_usdt}
-            onChange={e => setRules({ ...rules, max_daily_loss_usdt: Number(e.target.value) })}
+          <NumInput min="0" max="100000" value={rules.max_daily_loss_usdt}
+            onCommit={(v) => setRules({ ...rules, max_daily_loss_usdt: v })}
             data-testid="master-rule-daily-loss" />
         </label>
         <label>
           <span>Max. Trades pro Tag (0 = frei)</span>
-          <input type="number" min="0" max="200" value={rules.max_trades_per_day}
-            onChange={e => setRules({ ...rules, max_trades_per_day: Number(e.target.value) })}
+          <NumInput min="0" max="200" value={rules.max_trades_per_day}
+            onCommit={(v) => setRules({ ...rules, max_trades_per_day: v })}
             data-testid="master-rule-trades-per-day" />
         </label>
         <label>
           <span>Max. offene KI-Trades (0 = frei)</span>
-          <input type="number" min="0" max="50" value={rules.max_open_trades}
-            onChange={e => setRules({ ...rules, max_open_trades: Number(e.target.value) })}
+          <NumInput min="0" max="50" value={rules.max_open_trades}
+            onCommit={(v) => setRules({ ...rules, max_open_trades: v })}
             data-testid="master-rule-max-open" />
         </label>
         <label>
@@ -242,26 +243,26 @@ export const AIGovernancePanel = () => {
             </label>
             <label>
               <span>Min. geschlossene Trades (Engine)</span>
-              <input type="number" min="0" max="200" value={validation.min_closed_trades}
-                onChange={e => saveValidation({ min_closed_trades: Number(e.target.value) })}
+              <NumInput min="0" max="200" value={validation.min_closed_trades}
+                onCommit={(v) => saveValidation({ min_closed_trades: v })}
                 data-testid="validation-min-closed" />
             </label>
             <label>
               <span>Min. Trades pro Coin</span>
-              <input type="number" min="0" max="100" value={validation.min_symbol_trades}
-                onChange={e => saveValidation({ min_symbol_trades: Number(e.target.value) })}
+              <NumInput min="0" max="100" value={validation.min_symbol_trades}
+                onCommit={(v) => saveValidation({ min_symbol_trades: v })}
                 data-testid="validation-min-symbol" />
             </label>
             <label>
               <span>Min. Ergebnisse für neue Lektion</span>
-              <input type="number" min="0" max="200" value={validation.min_lesson_results}
-                onChange={e => saveValidation({ min_lesson_results: Number(e.target.value) })}
+              <NumInput min="0" max="200" value={validation.min_lesson_results}
+                onCommit={(v) => saveValidation({ min_lesson_results: v })}
                 data-testid="validation-min-lesson" />
             </label>
             <label>
               <span>Min. Ergebnisse zum Verwerfen</span>
-              <input type="number" min="0" max="300" value={validation.min_removal_results}
-                onChange={e => saveValidation({ min_removal_results: Number(e.target.value) })}
+              <NumInput min="0" max="300" value={validation.min_removal_results}
+                onCommit={(v) => saveValidation({ min_removal_results: v })}
                 data-testid="validation-min-removal" />
             </label>
           </div>
@@ -274,26 +275,26 @@ export const AIGovernancePanel = () => {
           <div className="gov-rules">
             <label>
               <span>Min. Trades (Struktur)</span>
-              <input type="number" min="0" max="500" value={validation.macro_min_trades}
-                onChange={e => saveValidation({ macro_min_trades: Number(e.target.value) })}
+              <NumInput min="0" max="500" value={validation.macro_min_trades}
+                onCommit={(v) => saveValidation({ macro_min_trades: v })}
                 data-testid="validation-macro-min-trades" />
             </label>
             <label>
               <span>Nötige Bestätigungen</span>
-              <input type="number" min="1" max="20" value={validation.macro_min_confirmations}
-                onChange={e => saveValidation({ macro_min_confirmations: Number(e.target.value) })}
+              <NumInput min="1" max="20" value={validation.macro_min_confirmations}
+                onCommit={(v) => saveValidation({ macro_min_confirmations: v })}
                 data-testid="validation-macro-confirmations" />
             </label>
             <label>
               <span>Max. Schritt (% des Werts)</span>
-              <input type="number" min="1" max="100" value={validation.macro_max_step_pct}
-                onChange={e => saveValidation({ macro_max_step_pct: Number(e.target.value) })}
+              <NumInput min="1" max="100" value={validation.macro_max_step_pct}
+                onCommit={(v) => saveValidation({ macro_max_step_pct: v })}
                 data-testid="validation-macro-step" />
             </label>
             <label>
               <span>Bestätigungs-Fenster (Tage)</span>
-              <input type="number" min="1" max="90" value={validation.macro_confirm_window_days}
-                onChange={e => saveValidation({ macro_confirm_window_days: Number(e.target.value) })}
+              <NumInput min="1" max="90" value={validation.macro_confirm_window_days}
+                onCommit={(v) => saveValidation({ macro_confirm_window_days: v })}
                 data-testid="validation-macro-window" />
             </label>
           </div>

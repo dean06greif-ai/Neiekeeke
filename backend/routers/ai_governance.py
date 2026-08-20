@@ -22,6 +22,7 @@ from services import ai_providers, ai_schedule, notify_guard
 from services.ai_engine import ai_engine
 from services.ai_lessons import lesson_store
 from services.ai_master_prompt import master_prompt
+from services.ai_master_prompt import rules_text as _rules_text
 from services.ai_strategy_lab import strategy_lab
 from services.ai_validation import validation_gate
 
@@ -66,7 +67,10 @@ async def set_master_prompt(body: Dict, _: bool = Depends(require_admin)):
                  f"gelöscht: {titles}")
     _opinion("MasterPrompt", f"Neuer MasterPrompt (v{snap['version']}):\n{snap['text']}\n"
                              f"Grundregeln für Lektionen: {snap['lesson_policy']}\n"
-                             f"Harte Regeln: {snap['rules']}")
+                             # Kein rohes Regel-Dict mehr: '0' wurde von der KI als
+                             # 'deaktiviert' fehlinterpretiert – rules_text macht die
+                             # Semantik (0 = kein Limit) explizit.
+                             f"Harte Regeln: {_rules_text(snap['rules'])}")
     return {"status": "success", "master_prompt": snap, "lesson_audit": audit}
 
 

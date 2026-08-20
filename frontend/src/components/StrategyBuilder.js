@@ -5,6 +5,7 @@ import { authHeaders, isAdmin } from '../auth';
 import { RULE_TIMEFRAMES, TF_MINUTES } from '../constants/timeframes';
 import SafeOverlay from './SafeOverlay';
 import './StrategyBuilder.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -398,9 +399,9 @@ const StrategyBuilder = ({ strategies, enabledIds, onClose, onChanged }) => {
             </div>
 
             <div className="sb-form-row indicators">
-              <label>EMA Fast<input type="number" value={periods.ema_fast_period ?? 9} onChange={e => setPeriods(p => ({ ...p, ema_fast_period: parseInt(e.target.value) || 9 }))} /></label>
-              <label>EMA Slow<input type="number" value={periods.ema_slow_period ?? 50} onChange={e => setPeriods(p => ({ ...p, ema_slow_period: parseInt(e.target.value) || 50 }))} /></label>
-              <label>RSI Periode<input type="number" value={periods.rsi_period ?? 14} onChange={e => setPeriods(p => ({ ...p, rsi_period: parseInt(e.target.value) || 14 }))} /></label>
+              <label>EMA Fast<NumInput int value={periods.ema_fast_period ?? 9} onCommit={(v) => setPeriods(p => ({ ...p, ema_fast_period: v || 9 }))} /></label>
+              <label>EMA Slow<NumInput int value={periods.ema_slow_period ?? 50} onCommit={(v) => setPeriods(p => ({ ...p, ema_slow_period: v || 50 }))} /></label>
+              <label>RSI Periode<NumInput int value={periods.rsi_period ?? 14} onCommit={(v) => setPeriods(p => ({ ...p, rsi_period: v || 14 }))} /></label>
             </div>
 
             <button className="sb-restore-btn" style={{ marginBottom: 10 }} onClick={() => setShowAdvanced(v => !v)} data-testid="toggle-advanced-periods">
@@ -412,9 +413,9 @@ const StrategyBuilder = ({ strategies, enabledIds, onClose, onChanged }) => {
                   .filter(f => !['ema_fast_period', 'ema_slow_period', 'rsi_period'].includes(f.key))
                   .map(f => (
                     <label key={f.key}>{f.label}
-                      <input type="number" step={f.key === 'bb_std' ? 0.1 : 1}
+                      <NumInput int step={f.key === 'bb_std' ? 0.1 : 1}
                         value={periods[f.key] ?? f.default}
-                        onChange={e => setPeriods(p => ({ ...p, [f.key]: f.key === 'bb_std' ? (parseFloat(e.target.value) || f.default) : (parseInt(e.target.value) || f.default) }))} />
+                        onCommit={(v) => setPeriods(p => ({ ...p, [f.key]: f.key === 'bb_std' ? (v || f.default) : (v || f.default) }))} />
                     </label>
                   ))}
               </div>
@@ -437,9 +438,9 @@ const StrategyBuilder = ({ strategies, enabledIds, onClose, onChanged }) => {
                 </select>
               </label>
               {slMode === 'percent'
-                ? <label className="sb-sl">SL %<input type="number" step={0.1} value={slPercent} onChange={e => setSlPercent(parseFloat(e.target.value))} /></label>
-                : <label className="sb-sl">SL Ticks<input type="number" value={slTicks} onChange={e => setSlTicks(parseInt(e.target.value))} /></label>}
-              <label className="sb-sl">CRV Ziel<input type="number" step={0.1} value={crv} onChange={e => setCrv(parseFloat(e.target.value))} /></label>
+                ? <label className="sb-sl">SL %<NumInput step={0.1} value={slPercent} onCommit={(v) => setSlPercent(v)} /></label>
+                : <label className="sb-sl">SL Ticks<NumInput int value={slTicks} onCommit={(v) => setSlTicks(v)} /></label>}
+              <label className="sb-sl">CRV Ziel<NumInput step={0.1} value={crv} onCommit={(v) => setCrv(v)} /></label>
             </div>
 
             <button className="sb-restore-btn" style={{ marginBottom: 8 }} onClick={runPreview} disabled={previewBusy} data-testid="rule-preview-btn"

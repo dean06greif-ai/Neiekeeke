@@ -136,6 +136,9 @@ DEFAULT_AI_CONFIG = {
     # V2: zusätzliches dynamisches SL-Minimum = fee_guard_atr_mult × 1m-ATR%.
     # Verhindert Stops im Markt-Rauschen (KI klebte SLs ans 0,5%-Fee-Minimum).
     "fee_guard_atr_mult": 4.0,
+    # V3: bei hohem CRV (>=2 / >=3) darf das Fee-Minimum um 15% / 25%
+    # unterschritten werden – knappe, aber fette Setups werden fair bewertet.
+    "fee_guard_crv_relax": True,
     # Stale-Price-Guard: Entry ablehnen, wenn die letzte Kerze älter ist (min; 0=aus).
     # RCA 17.08.: EURUSD-Doppel-Trade nutzte einen ~45 min alten Preis (Feed hing).
     "stale_price_max_min": 10,
@@ -646,6 +649,8 @@ class AIEngine:
                 self.config["fee_guard_atr_mult"] = max(0.0, min(30.0, float(updates["fee_guard_atr_mult"])))
             except (TypeError, ValueError):
                 pass
+        if "fee_guard_crv_relax" in updates:
+            self.config["fee_guard_crv_relax"] = bool(updates["fee_guard_crv_relax"])
         if "stale_price_max_min" in updates:
             try:
                 self.config["stale_price_max_min"] = max(0.0, min(120.0, float(updates["stale_price_max_min"])))
@@ -1937,10 +1942,15 @@ class AIEngine:
                     atr_note = (f" Zusätzlich gilt ein dynamisches Minimum von {fg_atr:g}× der "
                                 f"aktuellen 1m-ATR des Coins (es zählt das GRÖSSERE Minimum)."
                                 if fg_atr > 0 else "")
+                    crv_note = (" AUSNAHME (knappe Setups): Bei CRV >= 2 darf der SL das "
+                                "Minimum um bis zu 15% unterschreiten, bei CRV >= 3 um bis zu "
+                                "25% – ein starkes CRV deckt die Gebühren. Gib solche knappen, "
+                                "aber hochwertigen Setups also NICHT reflexartig als HOLD aus."
+                                if self.config.get("fee_guard_crv_relax", True) else "")
                     frame_lines.append(
                         f"FEE-WÄCHTER: sl_pct muss mind. {fg_mult * 0.12:.2f}% betragen "
                         f"({fg_mult:g}× Roundtrip-Fees ~0.12%).{atr_note} Engere Stops werden "
-                        f"technisch geblockt. WICHTIG: Das Minimum ist eine UNTERGRENZE, KEIN "
+                        f"technisch geblockt.{crv_note} WICHTIG: Das Minimum ist eine UNTERGRENZE, KEIN "
                         f"Zielwert – setze den SL IMMER an die Marktstruktur (Swing-Punkt, "
                         f"Range-Grenze), NIEMALS pauschal auf das Minimum. Liegt dein "
                         f"Struktur-SL unter dem Minimum, gib HOLD statt den SL künstlich zu "
@@ -2166,8 +2176,8 @@ class AIEngine:
         pnl = sum(float(r.get("realized_pnl") or 0) for r in rows)
         self._day_risk_cache = {"date": day, "realized_pnl": round(pnl, 4),
                                 "trades": len(rows),
-                                "limit_usdt": master_prompt.rules.get("max_daily_loss_usdt"),
-                                "max_trades": master_prompt.rules.get("max_trades_per_day")}
+                                "limit_usdt": master_prompt.rules.get("max_daily_loss_usdt") or None,
+                                "max_trades": master_prompt.rules.get("max_trades_per_day") or None}
         return round(pnl, 4), len(rows)
 
     async def _diversification_gate(self, sym: str, dec: Dict,

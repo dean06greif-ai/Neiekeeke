@@ -6,6 +6,7 @@ import SafeOverlay from './SafeOverlay';
 import './LocalWorkerPanel.css';
 import { assetLabel } from '../hooks/useInstruments';
 import { fmtDate, fmtShort } from '../lib/time';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -220,18 +221,18 @@ export default function LocalWorkerPanel({ onClose }) {
           <div className="lw-grid" data-testid="lw-settings">
             <label title="Anzahl der Prozesse für Multi-Core-Simulation (Backtest-Paare & Optimizer-Iterationen parallel). 0 = alle Kerne, 1 = sequenziell.">
               CPU-Kerne Multi-Core (0 = alle)
-              <input type="number" min={0} max={128} value={settings.cpu_cores}
-                onChange={e => set('cpu_cores', parseInt(e.target.value) || 0)}
+              <NumInput int min={0} max={128} value={settings.cpu_cores}
+                onCommit={(v) => set('cpu_cores', v || 0)}
                 data-testid="lw-set-cores" />
             </label>
             <label>RAM-Limit Kerzen-Cache (MB)
-              <input type="number" min={512} step={512} value={settings.ram_limit_mb}
-                onChange={e => set('ram_limit_mb', parseInt(e.target.value) || 4096)}
+              <NumInput int min={512} step={512} value={settings.ram_limit_mb}
+                onCommit={(v) => set('ram_limit_mb', v || 4096)}
                 data-testid="lw-set-ram" />
             </label>
             <label>Max. parallele Jobs
-              <input type="number" min={1} max={8} value={settings.max_parallel_jobs}
-                onChange={e => set('max_parallel_jobs', parseInt(e.target.value) || 1)}
+              <NumInput int min={1} max={8} value={settings.max_parallel_jobs}
+                onCommit={(v) => set('max_parallel_jobs', v || 1)}
                 data-testid="lw-set-parallel" />
             </label>
             <label title="GPU-Beschleunigung (NVIDIA/CuPy) für die Indikator-Vorberechnung (SMA, Bollinger, Stochastik). Automatische Erkennung mit CPU-Fallback – im Worker einmalig 'pip install cupy-cuda12x' ausführen.">
@@ -254,8 +255,8 @@ export default function LocalWorkerPanel({ onClose }) {
             </label>
             {settings.auto_update_enabled && (
               <label>Update-Intervall (Minuten)
-                <input type="number" min={5} max={1440} value={settings.auto_update_minutes}
-                  onChange={e => set('auto_update_minutes', parseInt(e.target.value) || 60)}
+                <NumInput int min={5} max={1440} value={settings.auto_update_minutes}
+                  onCommit={(v) => set('auto_update_minutes', v || 60)}
                   data-testid="lw-set-autominutes" />
               </label>
             )}

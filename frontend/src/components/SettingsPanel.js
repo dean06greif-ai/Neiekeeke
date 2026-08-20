@@ -6,6 +6,7 @@ import { authHeaders, isAdmin } from '../auth';
 import useInstruments, { assetLabel } from '../hooks/useInstruments';
 import TIMEFRAMES, { RULE_TIMEFRAMES, TF_MINUTES } from '../constants/timeframes';
 import './SettingsPanel.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -653,6 +654,7 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                               step={paramMeta.step}
                               onChange={(e) => updateStrategyParam(activeStrategy.id, paramKey, e.target.value)}
                               onBlur={() => commitParams(activeStrategy.id)}
+                              placeholder={String(paramMeta.value)}
                               data-testid={`param-input-${paramKey}`}
                             />
                           </div>
@@ -678,9 +680,8 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                             </div>
                             <div className="param-input-wrapper" style={{ display: 'flex', gap: 6 }}>
                               {typeof r.value === 'number' ? (
-                                <input type="number" step="any" className="param-input" value={r.value}
-                                  onChange={e => updateDefRuleValue(activeStrategy.id, 'long_rules', i,
-                                    e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                                <NumInput step="any" className="param-input" value={r.value}
+                                  onCommit={(v) => updateDefRuleValue(activeStrategy.id, 'long_rules', i, v)}
                                   data-testid={`def-rule-long-input-${i}`} />
                               ) : (
                                 <input type="text" className="param-input" value={String(r.value)} disabled
@@ -712,9 +713,8 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                             </div>
                             <div className="param-input-wrapper" style={{ display: 'flex', gap: 6 }}>
                               {typeof r.value === 'number' ? (
-                                <input type="number" step="any" className="param-input" value={r.value}
-                                  onChange={e => updateDefRuleValue(activeStrategy.id, 'short_rules', i,
-                                    e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                                <NumInput step="any" className="param-input" value={r.value}
+                                  onCommit={(v) => updateDefRuleValue(activeStrategy.id, 'short_rules', i, v)}
                                   data-testid={`def-rule-short-input-${i}`} />
                               ) : (
                                 <input type="text" className="param-input" value={String(r.value)} disabled
@@ -744,9 +744,8 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                                 <div className="param-description">Indikator-Periode/Einstellung</div>
                               </div>
                               <div className="param-input-wrapper">
-                                <input type="number" step="any" className="param-input" value={v}
-                                  onChange={e => updateDefIndicator(activeStrategy.id, k,
-                                    e.target.value === '' ? 0 : parseFloat(e.target.value))}
+                                <NumInput step="any" className="param-input" value={v}
+                                  onCommit={(nv) => updateDefIndicator(activeStrategy.id, k, nv)}
                                   data-testid={`def-ind-input-${k}`} />
                               </div>
                             </div>
@@ -1029,15 +1028,15 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                       <div className="fee-inputs" style={{ display: 'flex', gap: '14px', marginTop: '10px', flexWrap: 'wrap' }}>
                         <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px' }}>
                           Taker (%) – Market-Orders
-                          <input type="number" step="0.01" min="0" max="1" value={feeCfg.taker}
-                            onChange={e => setFeeCfg(f => ({ ...f, taker: e.target.value }))}
+                          <NumInput step="0.01" min="0" max="1" value={feeCfg.taker}
+                            onCommit={(v) => setFeeCfg(f => ({ ...f, taker: v }))}
                             data-testid="fee-taker-input"
                             style={{ width: '110px' }} className="param-input" />
                         </label>
                         <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px' }}>
                           Maker (%) – Limit-Orders
-                          <input type="number" step="0.01" min="0" max="1" value={feeCfg.maker}
-                            onChange={e => setFeeCfg(f => ({ ...f, maker: e.target.value }))}
+                          <NumInput step="0.01" min="0" max="1" value={feeCfg.maker}
+                            onCommit={(v) => setFeeCfg(f => ({ ...f, maker: v }))}
                             data-testid="fee-maker-input"
                             style={{ width: '110px' }} className="param-input" />
                         </label>
@@ -1181,21 +1180,21 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                     </label>
                     <div className="tg-guard-grid" style={{ display: 'flex', gap: 14, flexWrap: 'wrap', margin: '8px 0 12px 22px' }}>
                       <label style={{ fontSize: 12 }}>Max. Tagesverlust %
-                        <input type="number" step={0.5} min={0} className="guard-num-input" style={{ width: 70, marginLeft: 6 }}
+                        <NumInput step={0.5} min={0} className="guard-num-input" style={{ width: 70, marginLeft: 6 }}
                           value={guard.config.max_daily_loss_pct}
-                          onChange={e => saveGuard({ max_daily_loss_pct: parseFloat(e.target.value) || 0 })}
+                          onCommit={(v) => saveGuard({ max_daily_loss_pct: v || 0 })}
                           data-testid="guard-daily-loss-input" />
                       </label>
                       <label style={{ fontSize: 12 }}>Max. Verlust-Trades in Folge
-                        <input type="number" step={1} min={0} className="guard-num-input" style={{ width: 60, marginLeft: 6 }}
+                        <NumInput int step={1} min={0} className="guard-num-input" style={{ width: 60, marginLeft: 6 }}
                           value={guard.config.max_consecutive_losses}
-                          onChange={e => saveGuard({ max_consecutive_losses: parseInt(e.target.value) || 0 })}
+                          onCommit={(v) => saveGuard({ max_consecutive_losses: v || 0 })}
                           data-testid="guard-consec-losses-input" />
                       </label>
                       <label style={{ fontSize: 12 }} title="Bezugskapital für den Tagesverlust-%. 0 = automatisch (Summe der eingesetzten Margins des Tages)">Bezugskapital (0=auto)
-                        <input type="number" step={10} min={0} className="guard-num-input" style={{ width: 80, marginLeft: 6 }}
+                        <NumInput step={10} min={0} className="guard-num-input" style={{ width: 80, marginLeft: 6 }}
                           value={guard.config.ref_capital}
-                          onChange={e => saveGuard({ ref_capital: parseFloat(e.target.value) || 0 })} />
+                          onCommit={(v) => saveGuard({ ref_capital: v || 0 })} />
                       </label>
                     </div>
                     <label className="tg-toggle-row" data-testid="guard-antistacking-toggle">
@@ -1204,9 +1203,9 @@ const SettingsPanel = ({ onClose, focusStrategy, mode = 'all', controlState, onC
                       <span><b>Anti-Stacking</b> – gleiche Richtung + gleiches Asset + gleicher Timeframe blockiert für</span>
                     </label>
                     <label style={{ fontSize: 12, marginLeft: 22 }}>Cooldown (Minuten)
-                      <input type="number" step={5} min={1} className="guard-num-input" style={{ width: 60, marginLeft: 6 }}
+                      <NumInput step={5} min={1} className="guard-num-input" style={{ width: 60, marginLeft: 6 }}
                         value={guard.config.stacking_cooldown_min}
-                        onChange={e => saveGuard({ stacking_cooldown_min: parseFloat(e.target.value) || 30 })}
+                        onCommit={(v) => saveGuard({ stacking_cooldown_min: v || 30 })}
                         data-testid="guard-cooldown-input" />
                     </label>
                     <div className="info-hint" style={{ marginTop: 8 }}>

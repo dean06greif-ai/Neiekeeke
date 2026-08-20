@@ -10,6 +10,9 @@ DEFAULT_STRATEGY_OVERRIDE = {
     "enabled": False,
     "mode": "off",  # "live" | "paper" | "off"
     "signals_enabled": True,  # Bell toggle for signal notifications
+    # Darf der KI-Trader offene Trades dieser Strategie anpassen (SL/TP,
+    # Teilschließen, Margin)? Standard: nein – nur eigene KI-Trades.
+    "ai_manage": False,
     # Trade sizing
     "max_capital": 100.0,
     "leverage": 10,
@@ -44,6 +47,7 @@ DEFAULT_STRATEGY_COIN_CFG: dict = {
     "enabled": False,
     "mode": "off",
     "signals_enabled": True,
+    "ai_manage": False,
     "max_capital": 100.0,
     "leverage": 10,
     "order_type": "MARKET",

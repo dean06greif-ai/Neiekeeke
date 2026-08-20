@@ -87,6 +87,31 @@ rückwärtskompatibel und mit Regressionstests erfolgen. Original-Ordnerstruktur
    Bekannt: test_iter49::test_other_errors_still_skip_model_immediately flaked schon im
    Original-Repo (Round-Robin-Modulstate) – keine Regression dieser Session
 
+## Diese Session umgesetzt (20.06.2026 – Teil 3: 4 Features + kritischer Bugfix)
+1. BUGFIX 'max_trades_per_day = 0': Die KI interpretierte 0 als Deaktivierung. Es gab NIE eine
+   technische Sperre (0 = kein Limit in check_day_rules). Root Cause: ai_governance gab das rohe
+   Regel-Dict in den Meinungs-Prompt. Fix: rules_text() rendert Limits IMMER explizit
+   ('UNBEGRENZT (0 = kein Limit, KEINE Deaktivierung)'), ai_governance nutzt rules_text,
+   day_risk-Status liefert null statt 0. Zusätzlich: Orderflow-Loops werden im Lifespan-Shutdown
+   sauber gestoppt (Reload/Deploy hing sonst am endlos reconnectenden WS-Loop)
+2. Fee-Wächter V3 (knappe Setups fair bewerten): bei CRV >= 2 darf das SL-Minimum um 15%,
+   bei CRV >= 3 um 25% unterschritten werden (fee_guard_check mit tp-Parameter, Config
+   fee_guard_crv_relax, Default an, abschaltbar); Prompt-Regel entsprechend erweitert
+3. Manuelle Lektions-Validierung: POST /api/ai/lessons/candidates/approve {key} macht einen
+   noch nicht validierten Kandidaten sofort zur aktiven, gesperrten Lektion; Bestätigen-Button
+   im Lern-Panel (automatische Validierung über Wiedererkennung bleibt bestehen)
+4. KI-Trader & fremde Strategie-Trades: standardmäßig TABU (apply_action blockt, run_review
+   filtert). Freigabe per Häkchen 'ai_manage' in den Trade-Einstellungen der Strategie
+   (StrategyAutoTradeModal, Block 'KI-TRADER'; Coin-Level schlägt Strategie-Override,
+   Defaults in core/defaults.py; autotrader.ai_manage_allowed())
+5. Zahlenfelder website-weit (NumInput.js + Codemod scripts/codemod_numinput.py): Inhalt
+   löschbar, zuletzt gültiger Wert bleibt als graue Placeholder-Zahl, Blur ohne Eingabe stellt
+   den Wert zurück, Fokus markiert zum Überschreiben. ~105 Felder umgestellt; Felder mit
+   bewusster Sondersemantik (Backtester-Overrides mit ''-Placeholder, RegimeEngineSettings
+   unset=Default) blieben unverändert
+6. Tests: tests/test_improvements_fee_lessons_aimanage.py (14) + /app/tests/test_iter3_live_bugfix.py
+   (Testing-Agent, 5 Live-Checks) – 34/34 Unit + 5/5 Live + 3/3 Frontend-Spot-Checks grün
+
 ## Backlog / Nächste Aufgaben
 - P1: Dynamischer Gebühren-Filter (Punkt 2 aus KI-Selbstanalyse) weiter verfeinern
 - P2: Orderflow-Daten im Frontend visualisieren (Delta/CVD-Mini-Chart, inkl. FX-Futures-Proxy)

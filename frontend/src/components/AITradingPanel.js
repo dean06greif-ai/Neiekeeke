@@ -331,6 +331,20 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
     } catch (e) { toast.error(e.message); }
   };
 
+  const approveCandidate = async (key) => {
+    try {
+      const res = await fetch(`${API_URL}/api/ai/lessons/candidates/approve`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ key }),
+      });
+      const d = await res.json();
+      if (res.status === 401) { toast.error('Admin-Login erforderlich'); return; }
+      if (!res.ok) throw new Error(d.detail || 'Bestätigen fehlgeschlagen');
+      toast.success('Kandidat bestätigt – Lektion ist jetzt aktiv & gesperrt');
+      loadInsights();
+    } catch (e) { toast.error(e.message); }
+  };
+
   const saveLesson = async () => {
     if (!editLesson?.title?.trim()) { toast.error('Titel fehlt'); return; }
     try {
@@ -1206,9 +1220,19 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                 mehrfach in den Trade-Daten wiedererkennt:
                 <ul className="ai-lesson-list">
                   {insights.lesson_candidates.map((c, i) => (
-                    <li key={c.key || i} data-testid={`ai-lesson-candidate-${i}`}>
-                      <b>{c.title}</b>: {c.detail}{' '}
-                      <i>({c.confirmations}× wiedererkannt · Datenbasis {c.sample} Ergebnisse)</i>
+                    <li key={c.key || i} className="ai-skip-item" data-testid={`ai-lesson-candidate-${i}`}>
+                      <span className="ai-skip-text">
+                        <b>{c.title}</b>: {c.detail}{' '}
+                        <i>({c.confirmations}× wiedererkannt · Datenbasis {c.sample} Ergebnisse)</i>
+                      </span>
+                      <span className="ai-skip-actions">
+                        <button className="ai-skip-btn ok"
+                          title="Eigenhändig validieren – wird sofort aktive, vom Trader gesperrte Lektion"
+                          onClick={() => approveCandidate(c.key)}
+                          data-testid={`ai-candidate-approve-${i}`}>
+                          <CheckCircle size={15} weight="bold" />
+                        </button>
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -1373,8 +1397,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                 style={{ width: 60 }}
                 key={`medp-${cfg.min_entry_distance_pct ?? 0.5}`}
                 defaultValue={cfg.min_entry_distance_pct ?? 0.5}
+                placeholder={String(cfg.min_entry_distance_pct ?? 0.5)}
                 onBlur={e => {
-                  const v = parseFloat(e.target.value) || 0;
+                  const v = parseFloat(e.target.value);
+                  if (Number.isNaN(v)) { e.target.value = String(cfg.min_entry_distance_pct ?? 0.5); return; }
                   if (v !== (cfg.min_entry_distance_pct ?? 0.5)) updateConfig({ min_entry_distance_pct: v });
                 }}
                 data-testid="ai-min-entry-distance-input" />
@@ -1522,8 +1548,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                 style={{ width: 80 }}
                 key={`mcpt-${cfg.max_capital_per_trade ?? 0}`}
                 defaultValue={cfg.max_capital_per_trade ?? 0}
+                placeholder={String(cfg.max_capital_per_trade ?? 0)}
                 onBlur={e => {
-                  const v = parseFloat(e.target.value) || 0;
+                  const v = parseFloat(e.target.value);
+                  if (Number.isNaN(v)) { e.target.value = String(cfg.max_capital_per_trade ?? 0); return; }
                   if (v !== (cfg.max_capital_per_trade ?? 0)) updateConfig({ max_capital_per_trade: v });
                 }}
                 data-testid="ai-max-capital-per-trade" />
@@ -1535,8 +1563,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                   style={{ width: 56 }}
                   key={`crvmin-${cfg.crv_min ?? 1.2}`}
                   defaultValue={cfg.crv_min ?? 1.2}
+                  placeholder={String(cfg.crv_min ?? 1.2)}
                   onBlur={e => {
-                    const v = parseFloat(e.target.value) || 1.2;
+                    const v = parseFloat(e.target.value);
+                    if (Number.isNaN(v)) { e.target.value = String(cfg.crv_min ?? 1.2); return; }
                     if (v !== (cfg.crv_min ?? 1.2)) updateConfig({ crv_min: v });
                   }}
                   data-testid="ai-crv-min-input" />
@@ -1546,8 +1576,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                   key={`crvmax-${cfg.crv_max ?? 0}`}
                   defaultValue={cfg.crv_max ?? 0}
                   title="0 = keine Obergrenze"
+                  placeholder={String(cfg.crv_max ?? 0)}
                   onBlur={e => {
-                    const v = parseFloat(e.target.value) || 0;
+                    const v = parseFloat(e.target.value);
+                    if (Number.isNaN(v)) { e.target.value = String(cfg.crv_max ?? 0); return; }
                     if (v !== (cfg.crv_max ?? 0)) updateConfig({ crv_max: v });
                   }}
                   data-testid="ai-crv-max-input" />
@@ -1570,8 +1602,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                   style={{ width: 70 }}
                   key={`levam-${cfg.lev_auto_max ?? 25}`}
                   defaultValue={cfg.lev_auto_max ?? 25}
+                  placeholder={String(cfg.lev_auto_max ?? 25)}
                   onBlur={e => {
-                    const v = parseInt(e.target.value, 10) || 25;
+                    const v = parseInt(e.target.value, 10);
+                    if (Number.isNaN(v)) { e.target.value = String(cfg.lev_auto_max ?? 25); return; }
                     if (v !== (cfg.lev_auto_max ?? 25)) updateConfig({ lev_auto_max: v });
                   }}
                   data-testid="ai-lev-auto-max-input" />
@@ -1584,8 +1618,10 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                   style={{ width: 70 }}
                   key={`levfx-${cfg.lev_fixed ?? 10}`}
                   defaultValue={cfg.lev_fixed ?? 10}
+                  placeholder={String(cfg.lev_fixed ?? 10)}
                   onBlur={e => {
-                    const v = parseInt(e.target.value, 10) || 10;
+                    const v = parseInt(e.target.value, 10);
+                    if (Number.isNaN(v)) { e.target.value = String(cfg.lev_fixed ?? 10); return; }
                     if (v !== (cfg.lev_fixed ?? 10)) updateConfig({ lev_fixed: v });
                   }}
                   data-testid="ai-lev-fixed-input" />

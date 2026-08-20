@@ -11,6 +11,7 @@ import EquityChart from './EquityChart';
 import TIMEFRAMES from '../constants/timeframes';
 import './Backtester.css';
 import './BacktesterExtra.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -695,10 +696,10 @@ export default function Backtester({ onClose }) {
             </>
           )}
           <label>Kapital (USDT)
-            <input type="number" min={1} value={capital} onChange={e => setCapital(parseFloat(e.target.value) || 100)} data-testid="bt-capital" />
+            <NumInput min={1} value={capital} onCommit={(v) => setCapital(v || 100)} data-testid="bt-capital" />
           </label>
           <label>Gebühr % / Fill
-            <input type="number" step={0.01} value={fee} onChange={e => setFee(parseFloat(e.target.value) || 0)} data-testid="bt-fee" />
+            <NumInput step={0.01} value={fee} onCommit={(v) => setFee(v || 0)} data-testid="bt-fee" />
           </label>
           <label className="bt-check" title="Trades nur wenn ALLE Regeln der Strategie erfüllt sind (kein 3/5-Regeln-Trade)">
             <input type="checkbox" checked={requireAll} onChange={e => setRequireAll(e.target.checked)} data-testid="bt-require-all" />

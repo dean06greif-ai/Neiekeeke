@@ -3,6 +3,7 @@ import { Flask, CheckCircle, XCircle, ArrowCounterClockwise, ChartLine, Ghost, S
 import { toast } from '../lib/toast';
 import { authHeaders } from '../auth';
 import './AIGovernance.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -235,14 +236,14 @@ export const AIStrategyLabPanel = () => {
           </label>
           <label>
             <span>Min. Ghost-Trades</span>
-            <input type="number" min="3" max="200" value={settings.min_ghost_trades}
-              onChange={e => saveSettings({ min_ghost_trades: Number(e.target.value) })}
+            <NumInput min="3" max="200" value={settings.min_ghost_trades}
+              onCommit={(v) => saveSettings({ min_ghost_trades: v })}
               data-testid="strategy-min-ghost-trades" />
           </label>
           <label>
             <span>Min. Ghost-Winrate %</span>
-            <input type="number" min="30" max="95" value={settings.min_ghost_winrate}
-              onChange={e => saveSettings({ min_ghost_winrate: Number(e.target.value) })}
+            <NumInput min="30" max="95" value={settings.min_ghost_winrate}
+              onCommit={(v) => saveSettings({ min_ghost_winrate: v })}
               data-testid="strategy-min-ghost-winrate" />
           </label>
           <label>

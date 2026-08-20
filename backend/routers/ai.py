@@ -390,6 +390,26 @@ async def approve_skipped_wish(body: Dict, _: bool = Depends(require_admin)):
     return {"status": "success", "lesson": lesson}
 
 
+@router.post("/api/ai/lessons/candidates/approve")
+async def approve_lesson_candidate(body: Dict, _: bool = Depends(require_admin)):
+    """Noch nicht validierten Lektions-Kandidaten eigenhändig bestätigen ->
+    wird sofort aktive, vom Trader gesperrte Lektion. Die automatische
+    Validierung (Wiedererkennung über Lernläufe) bleibt daneben bestehen."""
+    key = str((body or {}).get("key") or "")
+    cand = await ai_engine.db.ai_lesson_candidates.find_one({"key": key}) if key else None
+    if not cand:
+        raise HTTPException(status_code=404, detail="Lektions-Kandidat nicht gefunden")
+    from services.ai_lessons import lesson_store
+    lesson = await lesson_store.create(
+        str(cand.get("title") or key),
+        str(cand.get("detail") or cand.get("title") or key),
+        weight=int(cand.get("weight", 3) or 3))
+    await ai_engine.db.ai_lesson_candidates.delete_one({"key": key})
+    if ai_engine.learning:
+        ai_engine.learning.invalidate_lessons()
+    return {"status": "success", "lesson": lesson}
+
+
 @router.post("/api/ai/lessons/skipped/delete")
 async def delete_skipped_wish(body: Dict, _: bool = Depends(require_admin)):
     """Zurückgestellten Lektions-Wunsch der KI endgültig löschen."""

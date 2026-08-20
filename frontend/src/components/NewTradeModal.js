@@ -3,6 +3,7 @@ import { X } from '@phosphor-icons/react';
 import { toast } from '../lib/toast';
 import { authHeaders } from '../auth';
 import './NewTradeModal.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -123,8 +124,8 @@ export default function NewTradeModal({ defaultSymbol, onClose, onOpened }) {
             data-testid="new-trade-margin-slider" />
           <div className="ntm-margin-vals">
             <span className="ntm-margin-input">
-              <input type="number" min={0} max={maxMargin || undefined} step="any" value={margin}
-                onChange={e => setMargin(Math.max(0, Number(e.target.value)))}
+              <NumInput min={0} max={maxMargin || undefined} step="any" value={margin}
+                onCommit={(v) => setMargin(Math.max(0, v))}
                 data-testid="new-trade-margin-input" />
               <em>USDT</em>
             </span>
@@ -141,8 +142,8 @@ export default function NewTradeModal({ defaultSymbol, onClose, onOpened }) {
           <label className="ntm-row" key={label}>
             <span>{label}</span>
             <span className="ntm-input">
-              <input type="number" min={min} max={max} step={step} value={val}
-                onChange={e => set(e.target.value)}
+              <NumInput min={min} max={max} step={step} value={val}
+                onCommit={(v) => set(v)}
                 data-testid={`new-trade-${label === 'Hebel' ? 'leverage' : (label === 'Stop-Loss' ? 'sl' : 'tp')}`} />
               <em>{unit}</em>
             </span>

@@ -4,6 +4,7 @@ import { toast } from '../lib/toast';
 import { authHeaders, isAdmin } from '../auth';
 import TIMEFRAMES from '../constants/timeframes';
 import { INDICATOR_GROUPS, INDICATOR_POOL } from '../lib/indicatorPool';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 const fmt = (v, d = 2) => (v === null || v === undefined ? '–' : Number(v).toFixed(d));
@@ -200,19 +201,19 @@ export default function RegimeOptimizePanel({ analysisId, scope, symbol, regime,
           </select>
         </label>
         <label className="opt-field">Iterationen
-          <input type="number" min={0} max={500} value={iterations}
-            onChange={e => setIterations(parseInt(e.target.value) || 0)}
+          <NumInput int min={0} max={500} value={iterations}
+            onCommit={(v) => setIterations(v || 0)}
             data-testid={`regime-opt-iterations-${regime.id}`} style={{ width: 70 }} />
         </label>
         <label className="opt-field">Min. Trades
-          <input type="number" min={1} max={500} value={minTrades}
-            onChange={e => setMinTrades(parseInt(e.target.value) || 1)}
+          <NumInput int min={1} max={500} value={minTrades}
+            onCommit={(v) => setMinTrades(v || 1)}
             data-testid={`regime-opt-mintrades-${regime.id}`} style={{ width: 60 }} />
         </label>
         {mode !== 'params' && (
           <label className="opt-field">Max. Regeln
-            <input type="number" min={1} max={8} value={maxRules}
-              onChange={e => setMaxRules(parseInt(e.target.value) || 1)}
+            <NumInput int min={1} max={8} value={maxRules}
+              onCommit={(v) => setMaxRules(v || 1)}
               data-testid={`regime-opt-maxrules-${regime.id}`} style={{ width: 55 }} />
           </label>
         )}
@@ -232,8 +233,8 @@ export default function RegimeOptimizePanel({ analysisId, scope, symbol, regime,
         </label>
         {regimeWf && (
           <label className="opt-field">Training %
-            <input type="number" min={40} max={95} value={regimeTrainPct}
-              onChange={e => setRegimeTrainPct(parseInt(e.target.value) || 75)}
+            <NumInput int min={40} max={95} value={regimeTrainPct}
+              onCommit={(v) => setRegimeTrainPct(v || 75)}
               data-testid={`regime-opt-trainpct-${regime.id}`} style={{ width: 55 }} />
           </label>
         )}

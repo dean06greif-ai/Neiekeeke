@@ -14,6 +14,7 @@ import DynamicPanel from './DynamicPanel';
 import { regimeColor } from '../lib/regimeColors';
 import { fmtDate, fmtDateTime } from '../lib/time';
 import './RegimeLab.css';
+import NumInput from './NumInput';
 
 const NNFX_LABELS = { trend: 'NNFX: Trend', range: 'NNFX: Seitwärts', breakout: 'NNFX: Breakout' };
 
@@ -1134,42 +1135,42 @@ export default function RegimeLab({ onClose }) {
             </label>
             <label className="opt-field" title="Vorderer Anteil für Regime-Clustering & Strategie-Suche; der Rest bleibt unangetastet für den finalen Walk-Forward">
               Training %
-              <input type="number" min={50} max={100} value={trainPct}
-                onChange={e => setTrainPct(parseInt(e.target.value) || 75)}
+              <NumInput int min={50} max={100} value={trainPct}
+                onCommit={(v) => setTrainPct(v || 75)}
                 data-testid="regime-trainpct" style={{ width: 55 }} />
             </label>
             {engine === 'kmeans' && (
               <>
                 <label className="opt-field" title="Fenster für Trend/Volatilität/Effizienz – größer = trägere, stabilere Regime">
                   Lookback (Tage)
-                  <input type="number" min={0.5} max={60} step={0.5} value={lookback}
-                    onChange={e => setLookback(parseFloat(e.target.value) || 3)}
+                  <NumInput min={0.5} max={60} step={0.5} value={lookback}
+                    onCommit={(v) => setLookback(v || 3)}
                     data-testid="regime-lookback" style={{ width: 55 }} />
                 </label>
                 <label className="opt-field">Max. Regime
-                  <input type="number" min={2} max={10} value={maxRegimes}
-                    onChange={e => setMaxRegimes(parseInt(e.target.value) || 5)}
+                  <NumInput int min={2} max={10} value={maxRegimes}
+                    onCommit={(v) => setMaxRegimes(v || 5)}
                     data-testid="regime-max" style={{ width: 50 }} />
                 </label>
                 <label className="opt-field" title="Regime mit kleinerem Anteil werden zusammengelegt">
                   Min. Anteil %
-                  <input type="number" min={1} max={30} value={minShare}
-                    onChange={e => setMinShare(parseInt(e.target.value) || 5)}
+                  <NumInput int min={1} max={30} value={minShare}
+                    onCommit={(v) => setMinShare(v || 5)}
                     data-testid="regime-minshare" style={{ width: 50 }} />
                 </label>
               </>
             )}
             <label className="opt-field" title="Umschalten nur bei dieser Sicherheit (Anti-Flattern)">
               Sicherheit %
-              <input type="number" min={50} max={95} value={confMin}
-                onChange={e => setConfMin(parseInt(e.target.value) || 70)}
+              <NumInput int min={50} max={95} value={confMin}
+                onCommit={(v) => setConfMin(v || 70)}
                 data-testid="regime-confmin" style={{ width: 50 }} />
             </label>
             <label className="opt-field"
               title="Mini-Phasen-Filter: kürzere Auf-/Ab-/Seitwärts-Phasen werden mit dem längeren Nachbarn zusammengelegt – weniger Mini-Regime, handelbarere Abschnitte. 0 = automatisch (~1% des Zeitraums)">
               Min. Phasendauer (d)
-              <input type="number" min={0} max={60} step={0.5} value={minHold}
-                onChange={e => setMinHold(parseFloat(e.target.value) || 0)}
+              <NumInput min={0} max={60} step={0.5} value={minHold}
+                onCommit={(v) => setMinHold(v || 0)}
                 data-testid="regime-minhold" style={{ width: 55 }} />
             </label>
             <button className="opt-run" onClick={startAnalysis} disabled={jobBlocked} data-testid="regime-analyze-btn">

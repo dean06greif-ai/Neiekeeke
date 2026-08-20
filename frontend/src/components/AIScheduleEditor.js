@@ -4,6 +4,7 @@ import { toast } from '../lib/toast';
 import { authHeaders } from '../auth';
 import { MODEL_OPTIONS } from '../lib/aiModels';
 import './AIGovernance.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -91,8 +92,8 @@ export const AIScheduleEditor = () => {
           <input type="time" value={w.to} onChange={e => update(i, { to: e.target.value })}
             data-testid={`schedule-to-${i}`} />
           <span className="gov-sched-sep">alle</span>
-          <input type="number" min="1" max="360" value={w.interval_min}
-            onChange={e => update(i, { interval_min: Number(e.target.value) })}
+          <NumInput min="1" max="360" value={w.interval_min}
+            onCommit={(v) => update(i, { interval_min: v })}
             data-testid={`schedule-interval-${i}`} />
           <span className="gov-sched-sep">min</span>
           <input type="text" placeholder="Bezeichnung" value={w.label || ''}
@@ -136,14 +137,14 @@ export const AIScheduleEditor = () => {
       <div className="gov-rules">
         <label>
           <span>Standard-Intervall (min)</span>
-          <input type="number" min="2" max="120" value={defaultInterval}
-            onChange={e => setDefaultInterval(e.target.value)}
+          <NumInput min="2" max="120" value={defaultInterval}
+            onCommit={(v) => setDefaultInterval(v)}
             data-testid="schedule-default-interval" />
         </label>
         <label>
           <span><BellSlash size={11} /> Telegram-Sperrzeit gleiches Setup (min)</span>
-          <input type="number" min="0" max="240" value={cooldown}
-            onChange={e => saveCooldown(e.target.value)}
+          <NumInput min="0" max="240" value={cooldown}
+            onCommit={(v) => saveCooldown(v)}
             data-testid="notify-cooldown" />
         </label>
       </div>

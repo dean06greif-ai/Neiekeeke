@@ -402,6 +402,18 @@ class AITradeManager:
             return {"status": "blocked",
                     "detail": "Manueller Trade – wird von der KI nicht gemanagt "
                               "(manuell auf der Website oder bei Bitunix verwalten)"}
+        # Trades ANDERER Strategien: standardmäßig tabu für die KI. Nur wenn in
+        # den Trade-Einstellungen der Strategie das Häkchen 'KI-Trader darf
+        # anpassen' (ai_manage) gesetzt ist, darf sie dort eingreifen.
+        if source == "ki":
+            from services.bitunix_trade import autotrader
+            if not autotrader.ai_manage_allowed(trade.get("strategy_id"),
+                                                trade.get("symbol")):
+                return {"status": "blocked",
+                        "detail": f"Trade der Strategie "
+                                  f"'{trade.get('strategy_name') or trade.get('strategy_id')}' – "
+                                  "KI-Anpassung nicht freigegeben (Häkchen 'KI-Trader darf "
+                                  "anpassen' in den Trade-Einstellungen der Strategie setzen)"}
         # Datensammel-Trades (Phase 4) laufen für saubere ML-Labels unangetastet
         # bis SL/TP: KI-Micro-Management (SL-Ratchet, Hebel-Reflexe) zerstörte die
         # Label-Qualität und stoppte Trades am Entry aus. Manuell bleibt erlaubt.
@@ -696,6 +708,11 @@ class AITradeManager:
                  "strategy_id": {"$ne": "external"},
                  "data_collection": {"$ne": True}}) \
                 .sort("opened_at", -1).limit(30).to_list(30)
+            # Fremde Strategie-Trades nur reviewen, wenn per Häkchen freigegeben –
+            # sonst tauchen sie gar nicht erst im Prompt auf.
+            from services.bitunix_trade import autotrader
+            trades = [t for t in trades
+                      if autotrader.ai_manage_allowed(t.get("strategy_id"), t.get("symbol"))]
             for t in trades:
                 t.pop("_id", None)
             if not trades:

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Wallet, CheckCircle } from '@phosphor-icons/react';
 import { toast } from '../lib/toast';
 import { authHeaders } from '../auth';
+import NumInput from './NumInput';
 import './CapitalModal.css';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
@@ -137,8 +138,8 @@ export default function CapitalModal({ initialScope = 'live', lockedScope, onClo
         ) : (
           <label className="cap-field" data-testid="capital-paper-base">
             Simuliertes Gesamtguthaben (USDT)
-            <input type="number" min="1" value={baseBalance}
-              onChange={e => setBaseBalance(e.target.value)} data-testid="capital-paper-base-input" />
+            <NumInput min="1" value={baseBalance}
+              onCommit={(v) => setBaseBalance(v)} data-testid="capital-paper-base-input" />
           </label>
         )}
 
@@ -152,17 +153,17 @@ export default function CapitalModal({ initialScope = 'live', lockedScope, onClo
               </span>
               {mode === m.id && m.id === 'fixed' && (
                 <span className="cap-input-wrap" onClick={e => e.preventDefault()}>
-                  <input type="number" min="1" placeholder="z.B. 500" value={value}
+                  <NumInput min="1" placeholder="z.B. 500" value={value}
                     onClick={e => e.stopPropagation()}
-                    onChange={e => setValue(e.target.value)} data-testid="capital-fixed-input" />
+                    onCommit={(v) => setValue(v)} data-testid="capital-fixed-input" />
                   <em>USDT</em>
                 </span>
               )}
               {mode === m.id && m.id === 'percent' && (
                 <span className="cap-input-wrap" onClick={e => e.preventDefault()}>
-                  <input type="number" min="1" max="100" placeholder="z.B. 25" value={value}
+                  <NumInput min="1" max="100" placeholder="z.B. 25" value={value}
                     onClick={e => e.stopPropagation()}
-                    onChange={e => setValue(e.target.value)} data-testid="capital-percent-input" />
+                    onCommit={(v) => setValue(v)} data-testid="capital-percent-input" />
                   <em>%</em>
                 </span>
               )}

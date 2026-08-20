@@ -104,7 +104,7 @@ def fee_guard_min_sl_pct(fee_percent: float, mult: float,
 
 
 def fee_guard_check(ai_cfg: Dict, cfg: Dict, entry: float, sl: float,
-                    atr: float = 0.0):
+                    atr: float = 0.0, tp: float = 0.0):
     """Fee-Wächter (KI-Trader): blockt Trades, deren SL-Distanz unter dem
     Vielfachen der Roundtrip-Fees ODER unter dem ATR-Rauschband liegt –
     mathematisch garantierte Fee-Verlierer bzw. Rausch-Stops.
@@ -127,6 +127,21 @@ def fee_guard_check(ai_cfg: Dict, cfg: Dict, entry: float, sl: float,
     min_pct = fee_guard_min_sl_pct(fee, mult, atr_pct, atr_mult)
     sl_dist_pct = abs(float(entry) - float(sl)) / float(entry) * 100.0
     if sl_dist_pct + 1e-9 < min_pct:
+        # V3 (knappe Setups fair bewerten): ein hohes CRV deckt die Gebühren
+        # überproportional – bei CRV >= 2 darf das Minimum um 15%, bei CRV >= 3
+        # um 25% unterschritten werden. Darunter bleibt der harte Block.
+        if tp and ai_cfg.get("fee_guard_crv_relax", True):
+            try:
+                crv = abs(float(tp) - float(entry)) / (abs(float(entry) - float(sl)) or 1e-9)
+            except (TypeError, ValueError, ZeroDivisionError):
+                crv = 0.0
+            relax = 0.75 if crv >= 3.0 else (0.85 if crv >= 2.0 else 1.0)
+            if relax < 1.0 and sl_dist_pct + 1e-9 >= min_pct * relax:
+                logger.info(
+                    f"Fee-Wächter V3: knappes Setup zugelassen – SL-Distanz {sl_dist_pct:.3f}% "
+                    f"unter Standard-Minimum {min_pct:.2f}%, aber CRV {crv:.2f} deckt die "
+                    f"Gebühren (gelockertes Minimum {min_pct * relax:.2f}%)")
+                return True, ""
         fee_floor = fee_guard_min_sl_pct(fee, mult)
         if min_pct > fee_floor + 1e-9:
             return False, (
@@ -856,6 +871,21 @@ class AutoTradeManager:
     def is_enabled(self, symbol: str) -> bool:
         return self.coin_cfg(symbol).get("enabled", False)
 
+    def ai_manage_allowed(self, strategy_id: Optional[str],
+                          symbol: Optional[str] = None) -> bool:
+        """Darf der KI-Trader offene Trades dieser Strategie anpassen?
+        Standard: NEIN – die KI managt nur ihre eigenen Trades (ai_trader).
+        Freigabe per Häkchen 'ai_manage' in den Trade-Einstellungen der
+        Strategie (per Coin-Config oder Strategie-Override)."""
+        if not strategy_id or strategy_id == "ai_trader":
+            return True
+        if symbol:
+            scc = self.config.get("strategy_coin_configs", {}) \
+                .get(f"{strategy_id}_{symbol}", {})
+            if scc.get("ai_manage") is not None:
+                return bool(scc.get("ai_manage"))
+        return bool(self.strategy_override(strategy_id).get("ai_manage", False))
+
     def _levels(self, cfg, side, entry, candles, indicators):
         # Volatility (ATR) drives a dynamic, noise-aware stop.
         atr = 0.0
@@ -1200,7 +1230,7 @@ class AutoTradeManager:
         # deshalb sitzt der Wächter an dieser Stelle und deckt alle Pfade ab
         # (Live-Signale, Sammel-Trades, KI-Panel-Trades). Abschaltbar im Setup.
         if strategy_id == "ai_trader":
-            fg_ok, fg_reason = fee_guard_check(ai_cfg, cfg, entry, sl, atr)
+            fg_ok, fg_reason = fee_guard_check(ai_cfg, cfg, entry, sl, atr, tp=tp1)
             if not fg_ok:
                 logger.info(f"AutoTrade blockiert {symbol} {side}: {fg_reason}")
                 signal["_reject_reason"] = fg_reason

@@ -5,6 +5,7 @@ import { regimeColor } from '../lib/regimeColors';
 import { authHeaders, isAdmin } from '../auth';
 import useInstruments, { assetLabel } from '../hooks/useInstruments';
 import { fmtDate, fmtDateTime } from '../lib/time';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 const fmt = (v, d = 2) => (v === null || v === undefined ? '–' : Number(v).toFixed(d));
@@ -290,9 +291,9 @@ export default function DynamicPanel() {
                       <label style={{ display: 'flex', gap: 4, alignItems: 'center' }}
                         title="So lange sind nach einem Regime-Wechsel neue Trades auf den betroffenen Coins gesperrt">
                         Sperre
-                        <input type="number" min={0} max={30} step={0.25}
+                        <NumInput min={0} max={30} step={0.25}
                           value={s.settings?.transition_lock_days ?? 0.5}
-                          onChange={e => saveSettings(s.id, { transition_lock_days: parseFloat(e.target.value) || 0 })}
+                          onCommit={(v) => saveSettings(s.id, { transition_lock_days: v || 0 })}
                           style={{ width: 55 }} data-testid={`dyn-transition-lock-${s.id}`} />
                         Tage
                       </label>

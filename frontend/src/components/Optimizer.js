@@ -15,6 +15,7 @@ import DynamicPanel from './DynamicPanel';
 import LearningPanel from './LearningPanel';
 import { INDICATOR_GROUPS, INDICATOR_POOL } from '../lib/indicatorPool';
 import './Optimizer.css';
+import NumInput from './NumInput';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -579,17 +580,17 @@ export default function Optimizer({ onClose }) {
             </select>
           </label>
           <label className="opt-field">Min. Trades
-            <input type="number" min={1} value={minTrades}
-              onChange={e => setMinTrades(parseInt(e.target.value) || 1)} data-testid="opt-min-trades" />
+            <NumInput int min={1} value={minTrades}
+              onCommit={(v) => setMinTrades(v || 1)} data-testid="opt-min-trades" />
           </label>
           <label className="opt-field">Iterationen
-            <input type="number" min={5} max={300} value={iterations}
-              onChange={e => setIterations(parseInt(e.target.value) || 40)} data-testid="opt-iterations" />
+            <NumInput int min={5} max={300} value={iterations}
+              onCommit={(v) => setIterations(v || 40)} data-testid="opt-iterations" />
           </label>
           {mode !== 'params' && mode !== 'dynamic' && (
             <label className="opt-field">Max. Regeln
-              <input type="number" min={1} max={6} value={maxRules}
-                onChange={e => setMaxRules(parseInt(e.target.value) || 4)} data-testid="opt-max-rules" />
+              <NumInput int min={1} max={6} value={maxRules}
+                onCommit={(v) => setMaxRules(v || 4)} data-testid="opt-max-rules" />
             </label>
           )}
         </div>
@@ -626,20 +627,20 @@ export default function Optimizer({ onClose }) {
             <div className="opt-setup" style={{ marginTop: 6 }}>
               <label className="opt-field" title="Die Suche stoppt automatisch, sobald so viele Kombinationen Training UND Walk-Forward bestanden haben. Die besten 5 werden immer behalten (auch über mehrere Läufe hinweg).">
                 Champions-Ziel
-                <input type="number" min={1} max={10} value={exploreChamps}
-                  onChange={e => setExploreChamps(parseInt(e.target.value) || 5)}
+                <NumInput int min={1} max={10} value={exploreChamps}
+                  onCommit={(v) => setExploreChamps(v || 5)}
                   data-testid="explore-target-champions" />
               </label>
               <label className="opt-field" title="Sicherheits-Zeitlimit in Minuten. 0 = unbegrenzt (läuft bis zum Champions-Ziel oder bis du auf 'Suche beenden' klickst).">
                 Zeitlimit (Min. · 0 = unbegrenzt)
-                <input type="number" min={0} max={1440} value={exploreMaxMin}
-                  onChange={e => setExploreMaxMin(parseInt(e.target.value) || 0)}
+                <NumInput int min={0} max={1440} value={exploreMaxMin}
+                  onCommit={(v) => setExploreMaxMin(v || 0)}
                   data-testid="explore-max-minutes" />
               </label>
               <label className="opt-field" title="Anteil der Daten fürs Training – der Rest ist der unbekannte Walk-Forward-Test (Pflicht bei der Endlos-Suche)">
                 Training (%)
-                <input type="number" min={50} max={95} value={wfTrainPct}
-                  onChange={e => setWfTrainPct(parseInt(e.target.value) || 75)}
+                <NumInput int min={50} max={95} value={wfTrainPct}
+                  onCommit={(v) => setWfTrainPct(v || 75)}
                   data-testid="explore-train-pct" />
               </label>
             </div>
@@ -660,28 +661,28 @@ export default function Optimizer({ onClose }) {
             </div>
             <div className="opt-setup" style={{ marginTop: 6 }}>
               <label className="opt-field">Max. Regime (3–10)
-                <input type="number" min={2} max={10} value={dynMaxRegimes}
-                  onChange={e => setDynMaxRegimes(parseInt(e.target.value) || 5)} data-testid="dyn-max-regimes" />
+                <NumInput int min={2} max={10} value={dynMaxRegimes}
+                  onCommit={(v) => setDynMaxRegimes(v || 5)} data-testid="dyn-max-regimes" />
               </label>
               <label className="opt-field" title="Rückblick-Fenster für die Markt-Features (Trend, Volatilität, Effizienz, Volumen)">
                 Merkmal-Fenster (Tage)
-                <input type="number" min={0.5} max={30} step={0.5} value={dynLookback}
-                  onChange={e => setDynLookback(parseFloat(e.target.value) || 3)} data-testid="dyn-lookback" />
+                <NumInput min={0.5} max={30} step={0.5} value={dynLookback}
+                  onCommit={(v) => setDynLookback(v || 3)} data-testid="dyn-lookback" />
               </label>
               <label className="opt-field" title="Erst ab dieser Sicherheit wird auf ein anderes Regime umgeschaltet (Anti-Flattern)">
                 Umschalt-Sicherheit (%)
-                <input type="number" min={50} max={95} value={dynConfMin}
-                  onChange={e => setDynConfMin(parseInt(e.target.value) || 70)} data-testid="dyn-conf-min" />
+                <NumInput int min={50} max={95} value={dynConfMin}
+                  onCommit={(v) => setDynConfMin(v || 70)} data-testid="dyn-conf-min" />
               </label>
               <label className="opt-field" title="Mindestdauer, die ein Regime aktiv bleibt, bevor gewechselt werden darf">
                 Mindesthaltedauer (Tage)
-                <input type="number" min={0.25} max={30} step={0.25} value={dynMinHold}
-                  onChange={e => setDynMinHold(parseFloat(e.target.value) || 2)} data-testid="dyn-min-hold" />
+                <NumInput min={0.25} max={30} step={0.25} value={dynMinHold}
+                  onCommit={(v) => setDynMinHold(v || 2)} data-testid="dyn-min-hold" />
               </label>
               <label className="opt-field" title="Anteil der Daten fürs Training – der Rest bleibt als unbekannter Test für den Vergleich dynamisch vs. statisch">
                 Training (%)
-                <input type="number" min={50} max={90} value={dynTrainPct}
-                  onChange={e => setDynTrainPct(parseInt(e.target.value) || 75)} data-testid="dyn-train-pct" />
+                <NumInput int min={50} max={90} value={dynTrainPct}
+                  onCommit={(v) => setDynTrainPct(v || 75)} data-testid="dyn-train-pct" />
               </label>
             </div>
             <div className="opt-override-legend" style={{ marginTop: 4 }}>
@@ -703,8 +704,8 @@ export default function Optimizer({ onClose }) {
               <div className="opt-setup" style={{ marginTop: 6 }}>
                 <label className="opt-field" title="Wie viele Regeln darf eine Sub-Strategie maximal bekommen? Mehr Regeln = spezifischer, aber höheres Overfitting-Risiko.">
                   Max. Regeln je Sub-Strategie
-                  <input type="number" min={1} max={8} value={dynMaxRules}
-                    onChange={e => setDynMaxRules(parseInt(e.target.value) || 4)} data-testid="dyn-max-rules-regime" />
+                  <NumInput int min={1} max={8} value={dynMaxRules}
+                    onCommit={(v) => setDynMaxRules(v || 4)} data-testid="dyn-max-rules-regime" />
                 </label>
                 <label className="opt-check" style={{ alignSelf: 'end' }} title="Startet die Regel-Suche bei den Regeln der gewählten Basis-Strategie statt bei null">
                   <input type="checkbox" checked={dynStartFromBase}
@@ -821,8 +822,8 @@ export default function Optimizer({ onClose }) {
                   </label>
                   {wfMode !== 'single' && (
                     <label className="opt-field">Anzahl Fenster
-                      <input type="number" min={2} max={12} value={wfWindows}
-                        onChange={e => setWfWindows(parseInt(e.target.value) || 4)}
+                      <NumInput int min={2} max={12} value={wfWindows}
+                        onCommit={(v) => setWfWindows(v || 4)}
                         data-testid="opt-wf-windows" />
                       <span className="opt-inline-hint">
                         {wfMode === 'anchored'
@@ -832,8 +833,8 @@ export default function Optimizer({ onClose }) {
                     </label>
                   )}
                   <label className="opt-field">Trainings-Anteil (%)
-                    <input type="number" min={50} max={95} value={wfTrainPct}
-                      onChange={e => setWfTrainPct(parseInt(e.target.value) || 75)}
+                    <NumInput int min={50} max={95} value={wfTrainPct}
+                      onCommit={(v) => setWfTrainPct(v || 75)}
                       data-testid="opt-wf-trainpct" />
                     <span className="opt-inline-hint" data-testid="opt-wf-split-info">
                       {wfMode === 'rolling'
@@ -847,8 +848,8 @@ export default function Optimizer({ onClose }) {
               )}
               {ddEnabled && (
                 <label className="opt-field">Max. Drawdown (% vom PnL)
-                  <input type="number" min={1} max={1000} value={ddMaxPct}
-                    onChange={e => setDdMaxPct(parseInt(e.target.value) || 40)}
+                  <NumInput int min={1} max={1000} value={ddMaxPct}
+                    onCommit={(v) => setDdMaxPct(v || 40)}
                     data-testid="opt-dd-maxpct" />
                   <span className="opt-inline-hint">40 = DD darf höchstens 40% des PnL betragen</span>
                 </label>
@@ -862,8 +863,8 @@ export default function Optimizer({ onClose }) {
                     </select>
                   </label>
                   <label className="opt-field">Max. Abweichung (%)
-                    <input type="number" min={1} max={1000} value={ctMaxDev}
-                      onChange={e => setCtMaxDev(parseInt(e.target.value) || 20)}
+                    <NumInput int min={1} max={1000} value={ctMaxDev}
+                      onCommit={(v) => setCtMaxDev(v || 20)}
                       data-testid="opt-ct-maxdev" />
                     <span className="opt-inline-hint">Streuung der Abschnitts-PnLs · 20% = sehr streng, 100% = locker</span>
                   </label>
