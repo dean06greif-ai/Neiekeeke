@@ -667,6 +667,14 @@ async def generate_chain(chain: List[Tuple[str, str]], prompt: str, system: str,
                          f"Prompt ~{est_tokens} Tokens > Budget {budget}")
             continue
         idxs = usable_key_indices(provider, len(keys))
+        # Bezahl-Modelle nur mit Primär-Key: Backup-Keys eines Providers
+        # gehören meist zu einem ANDEREN Konto ohne OpenRouter-Guthaben
+        # (402 Insufficient credits). Statt sinnlos Backup-Keys durchzu-
+        # probieren, sofort auf die Free-Modell-Fallback-Kette wechseln.
+        if model in PAID_MODELS_NO_FALLBACK:
+            idxs = [0] if 0 in idxs else []
+        if not idxs:
+            continue
         last_idx = idxs[-1]
         streak_429 = 0
         for i in idxs:
@@ -832,6 +840,11 @@ async def stream_chain(chain: List[Tuple[str, str]], prompt: str, system: str,
                           f"Prompt ~{est_tokens} Tokens > Budget {budget}")
             continue
         idxs = usable_key_indices(provider, len(keys))
+        # Bezahl-Modelle nur mit Primär-Key (siehe _generate_chain).
+        if model in PAID_MODELS_NO_FALLBACK:
+            idxs = [0] if 0 in idxs else []
+        if not idxs:
+            continue
         streak_429 = 0
         for i in idxs:
             key = keys[i]
