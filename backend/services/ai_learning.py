@@ -346,7 +346,14 @@ class AILearning:
         return rows
 
     async def _bump_lesson_candidate(self, key: str, title: str, detail: str,
-                                     model: str, weight: int, stats: Dict) -> Dict:
+                                     model: str, weight: int, stats: Dict) -> Optional[Dict]:
+        # Vom Trader endgültig verworfene Vorschläge werden nicht wieder Kandidat.
+        try:
+            rej = await self.db.settings.find_one({"_id": "ai_lesson_rejects"}) or {}
+            if key in (rej.get("keys") or []):
+                return None
+        except Exception:
+            pass
         doc = await self.db.ai_lesson_candidates.find_one({"key": key}) or {}
         totals = (stats or {}).get("totals") or {}
         entry = {
@@ -690,6 +697,10 @@ class AILearning:
                     # Datenbasis reicht – bis dahin bleibt sie Kandidat.
                     cand = await self._bump_lesson_candidate(
                         key, title, detail, model_used, run_weight, stats)
+                    if cand is None:
+                        _skip(title, "Vom Trader endgültig verworfen – wird nicht "
+                                     "erneut vorgeschlagen", detail)
+                        continue
                     if not gate_new.get("validated") or cand["confirmations"] < min_conf:
                         need = []
                         if cand["confirmations"] < min_conf:

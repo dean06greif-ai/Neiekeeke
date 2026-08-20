@@ -111,6 +111,11 @@ rückwärtskompatibel und mit Regressionstests erfolgen. Original-Ordnerstruktur
    unset=Default) blieben unverändert
 6. Tests: tests/test_improvements_fee_lessons_aimanage.py (14) + /app/tests/test_iter3_live_bugfix.py
    (Testing-Agent, 5 Live-Checks) – 34/34 Unit + 5/5 Live + 3/3 Frontend-Spot-Checks grün
+7. Kandidaten VERWERFEN (20.06., Nachtrag): POST /api/ai/lessons/candidates/delete löscht einen
+   Kandidaten endgültig (Sperrliste settings/ai_lesson_rejects, capped 300; _bump_lesson_candidate
+   liefert None für gesperrte Keys → Lernlauf skippt 'Vom Trader endgültig verworfen');
+   Papierkorb-Button neben Bestätigen im Lern-Panel. Testing-Agent: 4/4 Backend + UI grün
+   (/app/tests/test_iter4_lesson_reject.py, seedet+cleant eigenen synthetischen Key)
 
 ## Backlog / Nächste Aufgaben
 - P1: Dynamischer Gebühren-Filter (Punkt 2 aus KI-Selbstanalyse) weiter verfeinern

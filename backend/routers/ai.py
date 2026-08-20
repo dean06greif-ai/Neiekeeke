@@ -1,6 +1,7 @@
 """KI Trader (AI Trading Engine) Endpoints."""
 import json
 import logging
+from datetime import datetime, timezone
 from typing import Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -408,6 +409,25 @@ async def approve_lesson_candidate(body: Dict, _: bool = Depends(require_admin))
     if ai_engine.learning:
         ai_engine.learning.invalidate_lessons()
     return {"status": "success", "lesson": lesson}
+
+
+@router.post("/api/ai/lessons/candidates/delete")
+async def delete_lesson_candidate(body: Dict, _: bool = Depends(require_admin)):
+    """Lektions-Kandidaten ENDGÜLTIG verwerfen: wird gelöscht und über eine
+    Sperrliste (ai_lesson_rejects) dauerhaft blockiert – die KI kann denselben
+    Vorschlag in späteren Lernläufen nicht erneut zum Kandidaten machen."""
+    key = str((body or {}).get("key") or "")
+    cand = await ai_engine.db.ai_lesson_candidates.find_one({"key": key}) if key else None
+    if not cand:
+        raise HTTPException(status_code=404, detail="Lektions-Kandidat nicht gefunden")
+    await ai_engine.db.ai_lesson_candidates.delete_one({"key": key})
+    doc = await ai_engine.db.settings.find_one({"_id": "ai_lesson_rejects"}) or {}
+    keys = [k for k in (doc.get("keys") or []) if k != key] + [key]
+    await ai_engine.db.settings.update_one(
+        {"_id": "ai_lesson_rejects"},
+        {"$set": {"keys": keys[-300:], "updated_at": datetime.now(timezone.utc).isoformat()}},
+        upsert=True)
+    return {"status": "success", "deleted": key}
 
 
 @router.post("/api/ai/lessons/skipped/delete")

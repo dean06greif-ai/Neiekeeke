@@ -345,6 +345,20 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
     } catch (e) { toast.error(e.message); }
   };
 
+  const rejectCandidate = async (key) => {
+    try {
+      const res = await fetch(`${API_URL}/api/ai/lessons/candidates/delete`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ key }),
+      });
+      const d = await res.json();
+      if (res.status === 401) { toast.error('Admin-Login erforderlich'); return; }
+      if (!res.ok) throw new Error(d.detail || 'Verwerfen fehlgeschlagen');
+      toast.success('Kandidat endgültig verworfen – wird nicht erneut vorgeschlagen');
+      loadInsights();
+    } catch (e) { toast.error(e.message); }
+  };
+
   const saveLesson = async () => {
     if (!editLesson?.title?.trim()) { toast.error('Titel fehlt'); return; }
     try {
@@ -1231,6 +1245,12 @@ const AITradingPanel = ({ onClose, selectedCoin = 'BTCUSDT' }) => {
                           onClick={() => approveCandidate(c.key)}
                           data-testid={`ai-candidate-approve-${i}`}>
                           <CheckCircle size={15} weight="bold" />
+                        </button>
+                        <button className="ai-skip-btn del"
+                          title="Endgültig verwerfen – wird gelöscht und nicht erneut vorgeschlagen"
+                          onClick={() => rejectCandidate(c.key)}
+                          data-testid={`ai-candidate-reject-${i}`}>
+                          <Trash size={14} weight="bold" />
                         </button>
                       </span>
                     </li>
